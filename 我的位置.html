@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Location Viewer</title>
+    <script src="https://api.map.baidu.com/api?v=2.0&ak=IfOCUmJIp0H1nrZhgXoL7TQ3rJrZYuXO"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+        .info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="info">Latitude: <span id="latitude"></span>, Longitude: <span id="longitude"></span>, Location: <span id="location"></span></div>
+    <div id="map"></div>
+    <button id="myLocationBtn" style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">我的位置</button>
+    <script>
+        var map = new BMap.Map("map");
+        var geolocation = new BMap.Geolocation();
+        geolocation.getCurrentPosition(function (r) {
+            if (this.getStatus() == BMAP_STATUS_SUCCESS) {
+                var mk = new BMap.Marker(r.point);
+                map.addOverlay(mk);
+                map.panTo(r.point);
+                document.getElementById("latitude").textContent = r.point.lat.toFixed(6);
+                document.getElementById("longitude").textContent = r.point.lng.toFixed(6);
+
+                var geoc = new BMap.Geocoder();
+                geoc.getLocation(r.point, function (rs) {
+                    var addComp = rs.addressComponents;
+                    document.getElementById("location").textContent = addComp.province + ", " + addComp.city + ", " + addComp.district + ", " + addComp.street + ", " + addComp.streetNumber;
+                });
+            }
+            else {
+                alert('Failed to get location: ' + this.getStatus());
+            }
+        }, { enableHighAccuracy: true });
+
+        map.centerAndZoom(new BMap.Point(116.404, 39.915), 11);
+        map.addControl(new BMap.MapTypeControl());
+        map.enableScrollWheelZoom(true);
+
+        var myLocationBtn = document.getElementById('myLocationBtn');
+        myLocationBtn.addEventListener('click', function () {
+            geolocation.getCurrentPosition(function (r) {
+                if (this.getStatus() == BMAP_STATUS_SUCCESS) {
+                    var mk = new BMap.Marker(r.point);
+                    map.addOverlay(mk);
+                    map.panTo(r.point);
+                    document.getElementById("latitude").textContent = r.point.lat.toFixed(6);
+                    document.getElementById("longitude").textContent = r.point.lng.toFixed(6);
+
+                    var geoc = new BMap.Geocoder();
+                    geoc.getLocation(r.point, function (rs) {
+                        var addComp = rs.addressComponents;
+                        document.getElementById("location").textContent = addComp.province + ", " + addComp.city + ", " + addComp.district + ", " + addComp.street + ", " + addComp.streetNumber;
+                    });
+                }
+                else {
+                    alert('Failed to get location: ' + this.getStatus());
+                }
+            }, { enableHighAccuracy: true });
+        });
+    </script>
+</body>
+</html>
